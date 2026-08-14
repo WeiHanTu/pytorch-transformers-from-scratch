@@ -63,6 +63,19 @@ feed-forward layer, dropout 0.1, and a context length of 32.
 | `local` | Learned position embedding | ±4-token window | Masks a dense score matrix; this code remains O(T²) |
 | `disentangled` | Learned relative positions | Bidirectional global | DeBERTa-inspired experiment, not a full DeBERTa reproduction |
 
+### Inspecting learned attention
+
+<p align="center">
+  <img src="docs/figures/absolute-attention.png" width="100%" alt="Eight learned attention maps: two heads across four layers of the trained absolute-position encoder">
+</p>
+
+This qualitative probe uses the trained 89.60% baseline and the sentence “we will work together to
+build a better future for our country.” Layer 1 shows distinct, concentrated routing across its two
+heads—for example around `build`, `better`, and `country`—while later layers distribute attention
+more evenly. That pattern is consistent with early token selection followed by broader contextual
+aggregation, but a single attention example should not be treated as a causal explanation of the
+classifier's decision.
+
 ## Reproduced results
 
 These are measurements from the release code, not values copied from the original course report.
@@ -79,8 +92,13 @@ and 15-epoch budget.
 | Local window (±4) | 99.81% | 88.80% | 464,739 |
 | Disentangled attention | 99.90% | 89.20% | 511,587 |
 
+<p align="center">
+  <img src="docs/figures/classification-results.png" width="900" alt="Train and test accuracy for the four Transformer encoder variants">
+</p>
+
 The baseline was best in this single controlled run. The differences are small enough that repeated
-seeds would be needed before claiming an architectural winner.
+seeds would be needed before claiming an architectural winner. The 10–11 point train/test gaps also
+make the corpus size and regularization more consequential than the small differences among variants.
 
 ### Causal language modeling
 
@@ -93,6 +111,13 @@ estimate at the final checkpoint; each test value covers its complete split.
 | Barack Obama test | 429.83 |
 | George W. Bush test | 474.72 |
 | George H. W. Bush test | **419.57** |
+
+<p align="center">
+  <img src="docs/figures/language-model-results.png" width="950" alt="Decoder training perplexity curve and held-out perplexity by speaker">
+</p>
+
+Training perplexity fell monotonically at every 100-step checkpoint. The held-out gap remained
+substantial, with the George W. Bush split hardest under this tokenizer and training budget.
 
 The structured record, including learning curves and dataset fingerprints, is in
 [`results/benchmark.json`](results/benchmark.json).
@@ -123,6 +148,20 @@ Train and evaluate the causal language model:
 transformers-scratch language-model --max-steps 500 --output results/language_model.json
 ```
 
+Regenerate the two metric figures from the tracked benchmark:
+
+```bash
+python scripts/generate_result_figures.py
+```
+
+An authorized local dataset copy can also reproduce the trained attention overview:
+
+```bash
+transformers-scratch classify --variant absolute --epochs 15 \
+  --attention-sentence "we will work together to build a better future for our country" \
+  --attention-dir docs/figures
+```
+
 The default `--device auto` selects Apple Metal (`mps`) when available, CUDA otherwise, and CPU as
 a portable fallback. To require Apple GPU execution, pass `--device mps`; the command fails clearly
 if the installed PyTorch build or host does not expose MPS.
@@ -151,6 +190,8 @@ padding. GitHub Actions runs the same suite on every push and pull request.
 │   ├── visualization.py   # attention heatmaps
 │   └── cli.py             # reproducible command-line experiments
 ├── tests/                 # fast synthetic unit tests
+├── docs/figures/          # tracked benchmark and attention visualizations
+├── scripts/               # deterministic README figure generation
 ├── results/benchmark.json # release benchmark and configuration
 ├── DATASET.md             # provenance, hashes, and redistribution decision
 └── pyproject.toml         # installable package and CLI metadata

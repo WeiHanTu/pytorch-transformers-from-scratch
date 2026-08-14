@@ -81,6 +81,8 @@ def run_classification(
     learning_rate: float = 1e-3,
     block_size: int = 32,
     local_window_size: int = 4,
+    attention_sentence: str | None = None,
+    attention_output_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     path = validate_data_directory(data_dir, ("train_CLS.tsv", "test_CLS.tsv", "train_LM.txt"))
     device = select_device(device_name)
@@ -150,6 +152,25 @@ def run_classification(
             "parameters": count_parameters(model),
             "history": history,
         }
+        if attention_sentence is not None and attention_output_dir is not None:
+            from .visualization import save_attention_overview
+
+            tokens = tokenizer.tokenize(attention_sentence)[:block_size]
+            input_ids = torch.tensor(
+                [tokenizer.encode(attention_sentence)[:block_size]],
+                dtype=torch.long,
+                device=device,
+            )
+            attention_mask = torch.ones_like(input_ids, dtype=torch.bool)
+            model.eval()
+            with torch.no_grad():
+                _, attention_maps = model.encoder(
+                    input_ids, attention_mask, return_attention=True
+                )
+            figure_path = Path(attention_output_dir) / f"{variant}-attention.png"
+            save_attention_overview(attention_maps, tokens, figure_path)
+            results[variant]["attention_figure"] = str(figure_path)
+            print(f"[{variant}] attention_figure={figure_path}", flush=True)
         print(f"[{variant}] test_accuracy={test_accuracy:.4f}", flush=True)
 
     return {

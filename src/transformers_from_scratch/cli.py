@@ -40,6 +40,14 @@ def build_parser() -> argparse.ArgumentParser:
     classification.add_argument("--variant", choices=(*VARIANTS, "all"), default="absolute")
     classification.add_argument("--epochs", type=int, default=15)
     classification.add_argument("--local-window-size", type=int, default=4)
+    classification.add_argument(
+        "--attention-sentence",
+        help="Optional sentence whose trained encoder attention should be rendered",
+    )
+    classification.add_argument(
+        "--attention-dir",
+        help="Directory for the attention overview; requires --attention-sentence",
+    )
 
     language_model = subparsers.add_parser("language-model", help="Train the causal decoder LM")
     _shared_arguments(language_model)
@@ -50,8 +58,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> dict[str, Any]:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
     if args.command == "classify":
+        if bool(args.attention_sentence) != bool(args.attention_dir):
+            parser.error("--attention-sentence and --attention-dir must be provided together")
         variants = VARIANTS if args.variant == "all" else (args.variant,)
         result = run_classification(
             data_dir=args.data_dir,
@@ -63,6 +74,8 @@ def main(argv: list[str] | None = None) -> dict[str, Any]:
             learning_rate=args.learning_rate,
             block_size=args.block_size,
             local_window_size=args.local_window_size,
+            attention_sentence=args.attention_sentence,
+            attention_output_dir=args.attention_dir,
         )
     else:
         result = run_language_model(
