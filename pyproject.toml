@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytorch-transformers-from-scratch"
+version = "1.0.0"
+description = "Readable PyTorch implementations of encoder and decoder Transformer blocks"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Wei-Han Tu" }]
+dependencies = [
+  "torch>=2.2,<3",
+  "matplotlib>=3.8,<4",
+]
+
+[project.scripts]
+transformers-scratch = "transformers_from_scratch.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

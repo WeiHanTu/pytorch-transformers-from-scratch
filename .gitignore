@@ -1,0 +1,22 @@
+.DS_Store
+.idea/
+.vscode/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# The course dataset has no explicit redistribution license.
+speechesdataset/
+
+# Generated experiment artifacts (the curated benchmark is tracked).
+results/*
+!results/benchmark.json
+attention_maps/
+checkpoints/

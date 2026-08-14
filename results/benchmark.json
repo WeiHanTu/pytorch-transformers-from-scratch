@@ -1,0 +1,73 @@
+{
+  "benchmark_date": "2026-08-14",
+  "environment": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "3.12.7",
+    "pytorch": "2.5.1",
+    "device": "cpu"
+  },
+  "shared_config": {
+    "seed": 42,
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "block_size": 32,
+    "vocab_size": 5255,
+    "embedding_dim": 64,
+    "num_heads": 2,
+    "num_layers": 4,
+    "feedforward_dim": 100,
+    "dropout": 0.1
+  },
+  "classification": {
+    "epochs": 15,
+    "variants": {
+      "absolute": {
+        "train_accuracy": 0.998565965583174,
+        "test_accuracy": 0.896,
+        "parameters": 464739
+      },
+      "alibi": {
+        "train_accuracy": 0.9961759082217974,
+        "test_accuracy": 0.8853333333333333,
+        "parameters": 462691
+      },
+      "local": {
+        "window_size": 4,
+        "train_accuracy": 0.9980879541108987,
+        "test_accuracy": 0.888,
+        "parameters": 464739
+      },
+      "disentangled": {
+        "train_accuracy": 0.9990439770554493,
+        "test_accuracy": 0.892,
+        "parameters": 511587
+      }
+    }
+  },
+  "language_model": {
+    "max_steps": 500,
+    "parameters": 457936,
+    "train_perplexity": 245.71952904442904,
+    "train_evaluation_batches": 200,
+    "test_perplexity": {
+      "obama": 429.83289769883663,
+      "g_w_bush": 474.7227211240718,
+      "ghw_bush": 419.57266196667354
+    },
+    "history": [
+      {"step": 100, "train_perplexity": 501.20841434561385},
+      {"step": 200, "train_perplexity": 414.5375584160806},
+      {"step": 300, "train_perplexity": 368.1565377719217},
+      {"step": 400, "train_perplexity": 298.3728596181847},
+      {"step": 500, "train_perplexity": 245.71952904442904}
+    ]
+  },
+  "dataset_sha256": {
+    "train_CLS.tsv": "7dbd7cadc6efe746d0c0a7e5fe81f0ac2431bd2a3b86b51f4cb23f373466c88e",
+    "test_CLS.tsv": "31277b7d67cff8ad717c9f43c05810c6b78feb67f04472bd7aa20e71eb2e0da8",
+    "train_LM.txt": "aff1d88fad90db8cedfe8918a9099ffdfe622641a2a8c6e25dac1f7eda199b1a",
+    "test_LM_obama.txt": "6cb3bb657ae40cab1cb8f3f38f391dbdcc80a9b21b577d5fc1ea4ba86901bed2",
+    "test_LM_wbush.txt": "1281773860075b12727f9f581940c028074d05f3efbf99bbfcc9c7c472d4dbd5",
+    "test_LM_hbush.txt": "a0592374b7cd47a6417a311892a4b8a59f35cbe054cbaf96c06e50e904c8451f"
+  }
+}
